@@ -46,9 +46,9 @@ public class Server {
     private static final int MAX_TASK_QUEUE_SIZE = 20000;
     private static final int KEEP_ALIVE_TIME = 500;
     private static final ThreadPoolExecutor WORKING_THREADS = new ThreadPoolExecutor(MIN_SERVER_POOL_SIZE,
-        MAX_SERVER_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
-        new LinkedBlockingQueue<>(MAX_TASK_QUEUE_SIZE),
-        new NamedThreadFactory("ServerHandlerThread", MAX_SERVER_POOL_SIZE), new ThreadPoolExecutor.CallerRunsPolicy());
+            MAX_SERVER_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(MAX_TASK_QUEUE_SIZE),
+            new NamedThreadFactory("ServerHandlerThread", MAX_SERVER_POOL_SIZE), new ThreadPoolExecutor.CallerRunsPolicy());
 
     /**
      * The entry point of application.
@@ -64,19 +64,24 @@ public class Server {
 
         //initialize the metrics
         MetricsManager.get().init();
-
+        //取得存储模式，db或者file
         System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
-
+        //简历一个rpc服务器
         RpcServer rpcServer = new RpcServer(WORKING_THREADS);
-        //server port
+        //server port，设置rpc服务器端口
         rpcServer.setListenPort(parameterParser.getPort());
+        //uuid配置器配置默认节点
         UUIDGenerator.init(parameterParser.getServerNode());
         //log store mode : file, db
         SessionHolder.init(parameterParser.getStoreMode());
 
+        //默认协调器，用于处理begin/commit/rollback/register/report操作
+        //request进来，默认就使用coordinator来做处理，并返回response
         DefaultCoordinator coordinator = new DefaultCoordinator(rpcServer);
         coordinator.init();
         rpcServer.setHandler(coordinator);
+
+
         // register ShutdownHook
         ShutdownHook.getInstance().addDisposable(coordinator);
         ShutdownHook.getInstance().addDisposable(rpcServer);
@@ -90,6 +95,7 @@ public class Server {
         XID.setPort(rpcServer.getListenPort());
 
         try {
+            //使用netty启动seata
             rpcServer.init();
         } catch (Throwable e) {
             LOGGER.error("rpcServer init error:{}", e.getMessage(), e);

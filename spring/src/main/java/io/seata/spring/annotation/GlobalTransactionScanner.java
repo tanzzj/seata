@@ -142,8 +142,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
      * @param mode               the mode
      * @param failureHandlerHook the failure handler hook
      */
-    public GlobalTransactionScanner(String applicationId, String txServiceGroup, int mode,
-                                    FailureHandler failureHandlerHook) {
+    public GlobalTransactionScanner(String applicationId, String txServiceGroup, int mode, FailureHandler failureHandlerHook) {
         setOrder(ORDER_NUM);
         setProxyTargetClass(true);
         this.applicationId = applicationId;

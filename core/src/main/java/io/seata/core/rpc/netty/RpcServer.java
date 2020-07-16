@@ -50,8 +50,7 @@ public class RpcServer extends AbstractRpcRemotingServer {
      */
     @Override
     public void init() {
-        DefaultServerMessageListenerImpl defaultServerMessageListenerImpl =
-            new DefaultServerMessageListenerImpl(getTransactionMessageHandler());
+        DefaultServerMessageListenerImpl defaultServerMessageListenerImpl = new DefaultServerMessageListenerImpl(getTransactionMessageHandler());
         defaultServerMessageListenerImpl.init();
         defaultServerMessageListenerImpl.setServerMessageSender(this);
         super.setServerMessageListener(defaultServerMessageListenerImpl);
