@@ -131,6 +131,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     @Override
     protected void doGlobalBegin(GlobalBeginRequest request, GlobalBeginResponse response, RpcContext rpcContext) throws TransactionException {
+        //开启全局事务，并返回一个xid给客户端
         response.setXid(
                 core.begin(
                         rpcContext.getApplicationId(),
@@ -147,7 +148,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     @Override
     protected void doGlobalCommit(GlobalCommitRequest request, GlobalCommitResponse response, RpcContext rpcContext) throws TransactionException {
-        response.setGlobalStatus(core.commit(request.getXid()));
+        response.setGlobalStatus(
+                core.commit(request.getXid())
+        );
     }
 
     @Override

@@ -645,6 +645,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         return branchSessions;
     }
 
+
     public void asyncCommit() throws TransactionException {
         this.addSessionLifecycleListener(SessionHolder.getAsyncCommittingSessionManager());
         SessionHolder.getAsyncCommittingSessionManager().addGlobalSession(this);

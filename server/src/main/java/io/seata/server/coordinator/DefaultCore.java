@@ -156,19 +156,20 @@ public class DefaultCore implements Core {
                         session.getStatus()
                 )
         );
-
+        //返回一个xid
         return session.getXid();
     }
 
     @Override
     public GlobalStatus commit(String xid) throws TransactionException {
+        //通过xid找到全局事务以及其下面的所有分支事务
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         if (globalSession == null) {
             return GlobalStatus.Finished;
         }
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         // just lock changeStatus
-
+        //判断当前事务是否能被提交
         boolean shouldCommit = SessionHolder.lockAndExecute(globalSession, () -> {
             // the lock should release after branch commit
             // Highlight: Firstly, close the session, then no more branch can be registered.
@@ -183,6 +184,7 @@ public class DefaultCore implements Core {
             return globalSession.getStatus();
         }
         if (globalSession.canBeCommittedAsync()) {
+            //二阶段异步提交
             globalSession.asyncCommit();
             return GlobalStatus.Committed;
         } else {
@@ -195,21 +197,32 @@ public class DefaultCore implements Core {
     public boolean doGlobalCommit(GlobalSession globalSession, boolean retrying) throws TransactionException {
         boolean success = true;
         // start committing event
-        eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-                globalSession.getTransactionName(), globalSession.getBeginTime(), null, globalSession.getStatus()));
+        eventBus.post(
+                new GlobalTransactionEvent(
+                        globalSession.getTransactionId(),
+                        GlobalTransactionEvent.ROLE_TC,
+                        globalSession.getTransactionName(),
+                        globalSession.getBeginTime(),
+                        null,
+                        globalSession.getStatus()
+                )
+        );
 
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalCommit(globalSession, retrying);
         } else {
+            //把所有分支事务拿出来
             for (BranchSession branchSession : globalSession.getSortedBranches()) {
                 BranchStatus currentStatus = branchSession.getStatus();
+                //如果是一阶段失败的分支事务直接从全局事务中移除
                 if (currentStatus == BranchStatus.PhaseOne_Failed) {
                     globalSession.removeBranch(branchSession);
                     continue;
                 }
                 try {
+                    //执行分支事务二阶段提交
+                    //branchType指seata的事务类型AT/TCC/SAGA等
                     BranchStatus branchStatus = getCore(branchSession.getBranchType()).branchCommit(globalSession, branchSession);
-
                     switch (branchStatus) {
                         case PhaseTwo_Committed:
                             globalSession.removeBranch(branchSession);

@@ -46,8 +46,7 @@ import org.slf4j.LoggerFactory;
  * @author zhangsen
  */
 @LoadLevel(name = "db", scope = Scope.PROTOTYPE)
-public class DataBaseSessionManager extends AbstractSessionManager
-    implements SessionManager, SessionLifecycleListener, Initialize, Reloadable {
+public class DataBaseSessionManager extends AbstractSessionManager implements SessionManager, SessionLifecycleListener, Initialize, Reloadable {
 
     /**
      * The constant LOGGER.
@@ -193,8 +192,7 @@ public class DataBaseSessionManager extends AbstractSessionManager
     }
 
     @Override
-    public <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
-            throws TransactionException {
+    public <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable) throws TransactionException {
         return lockCallable.call();
     }
 
