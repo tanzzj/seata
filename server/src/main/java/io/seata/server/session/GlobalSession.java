@@ -168,8 +168,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     @Override
-    public void changeBranchStatus(BranchSession branchSession, BranchStatus status)
-        throws TransactionException {
+    public void changeBranchStatus(BranchSession branchSession, BranchStatus status) throws TransactionException {
         branchSession.setStatus(status);
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onBranchStatusChange(this, branchSession, status);
@@ -238,6 +237,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     @Override
     public void addBranch(BranchSession branchSession) throws TransactionException {
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
+            //往listenter里面添加数据，使用观察者模式进行数据库分支事务数据写入
             lifecycleListener.onAddBranch(this, branchSession);
         }
         branchSession.setStatus(BranchStatus.Registered);

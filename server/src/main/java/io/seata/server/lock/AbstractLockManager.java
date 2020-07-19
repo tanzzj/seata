@@ -153,8 +153,7 @@ public abstract class AbstractLockManager implements LockManager {
      * @param branchID      the branch id
      * @return the list
      */
-    protected List<RowLock> collectRowLocks(String lockKey, String resourceId, String xid, Long transactionId,
-                                            Long branchID) {
+    protected List<RowLock> collectRowLocks(String lockKey, String resourceId, String xid, Long transactionId, Long branchID) {
         List<RowLock> locks = new ArrayList<RowLock>();
 
         String[] tableGroupedLockKeys = lockKey.split(";");

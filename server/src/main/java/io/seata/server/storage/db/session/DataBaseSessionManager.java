@@ -127,6 +127,7 @@ public class DataBaseSessionManager extends AbstractSessionManager implements Se
         if (StringUtils.isNotBlank(taskName)) {
             return;
         }
+        //将分支保存到数据库
         boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_ADD, session);
         if (!ret) {
             throw new StoreException("addBranchSession failed.");

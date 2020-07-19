@@ -191,9 +191,6 @@ public class SessionHolder {
      * @return the root session manager
      */
     public static SessionManager getRootSessionManager() {
-        if (ROOT_SESSION_MANAGER == null) {
-            throw new ShouldNeverHappenException("SessionManager is NOT init!");
-        }
         return ROOT_SESSION_MANAGER;
     }
 

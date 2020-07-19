@@ -95,18 +95,19 @@ public class DefaultCore implements Core {
 
     @Override
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
+        //根据不同的事务模式进行分支注册
         return getCore(branchType).branchRegister(
                 branchType,
                 resourceId,
                 clientId,
                 xid,
                 applicationData,
-                lockKeys);
+                lockKeys
+        );
     }
 
     @Override
-    public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status,
-                             String applicationData) throws TransactionException {
+    public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
         getCore(branchType).branchReport(branchType, xid, branchId, status, applicationData);
     }
 

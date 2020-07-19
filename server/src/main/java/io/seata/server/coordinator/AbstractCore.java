@@ -15,9 +15,6 @@
  */
 package io.seata.server.coordinator;
 
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
-
 import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
@@ -39,12 +36,10 @@ import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.core.exception.TransactionExceptionCode.BranchTransactionNotExist;
-import static io.seata.core.exception.TransactionExceptionCode.FailedToAddBranch;
-import static io.seata.core.exception.TransactionExceptionCode.GlobalTransactionNotActive;
-import static io.seata.core.exception.TransactionExceptionCode.GlobalTransactionStatusInvalid;
-import static io.seata.core.exception.TransactionExceptionCode.FailedToSendBranchCommitRequest;
-import static io.seata.core.exception.TransactionExceptionCode.FailedToSendBranchRollbackRequest;
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
+import static io.seata.core.exception.TransactionExceptionCode.*;
 
 /**
  * The type abstract core.
@@ -67,34 +62,50 @@ public abstract class AbstractCore implements Core {
 
     @Override
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
+        //先判断全局事务是否还存在
         GlobalSession globalSession = assertGlobalSessionNotNull(xid, false);
-        return SessionHolder.lockAndExecute(globalSession, () -> {
-            globalSessionStatusCheck(globalSession);
-            globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
-            BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, branchType, resourceId,
-                    applicationData, lockKeys, clientId);
-            branchSessionLock(globalSession, branchSession);
-            try {
-                globalSession.addBranch(branchSession);
-            } catch (RuntimeException ex) {
-                branchSessionUnlock(branchSession);
-                throw new BranchTransactionException(FailedToAddBranch, String
-                        .format("Failed to store branch xid = %s branchId = %s", globalSession.getXid(),
-                                branchSession.getBranchId()), ex);
-            }
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Register branch successfully, xid = {}, branchId = {}, resourceId = {} ,lockKeys = {}",
-                    globalSession.getXid(), branchSession.getBranchId(), resourceId, lockKeys);
-            }
-            return branchSession.getBranchId();
-        });
+
+        return
+                SessionHolder.lockAndExecute(globalSession, () -> {
+                    //判断全局事务状态：是否处于一阶段且是否处于active状态
+                    globalSessionStatusCheck(globalSession);
+                    globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
+                    //开启分支session
+                    BranchSession branchSession =
+                            SessionHelper.newBranchByGlobal(
+                                    globalSession,
+                                    branchType,
+                                    resourceId,
+                                    applicationData,
+                                    lockKeys,
+                                    clientId
+                            );
+                    //根据request的lockList获取分支事务锁
+                    branchSessionLock(globalSession, branchSession);
+                    try {
+                        //往全局事务里添加分支事务
+                        globalSession.addBranch(branchSession);
+                    } catch (RuntimeException ex) {
+                        branchSessionUnlock(branchSession);
+                        throw new BranchTransactionException(FailedToAddBranch,
+                                String.format("Failed to store branch xid = %s branchId = %s",
+                                        globalSession.getXid(),
+                                        branchSession.getBranchId()),
+                                ex);
+                    }
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("Register branch successfully, xid = {}, branchId = {}, resourceId = {} ,lockKeys = {}",
+                                globalSession.getXid(), branchSession.getBranchId(), resourceId, lockKeys);
+                    }
+                    return branchSession.getBranchId();
+                });
     }
 
     protected void globalSessionStatusCheck(GlobalSession globalSession) throws GlobalTransactionException {
         if (!globalSession.isActive()) {
             throw new GlobalTransactionException(GlobalTransactionNotActive, String.format(
-                "Could not register branch into global session xid = %s status = %s, cause by globalSession not active",
-                globalSession.getXid(), globalSession.getStatus()));
+                    "Could not register branch into global session xid = %s status = %s, cause by globalSession not active",
+                    globalSession.getXid(), globalSession.getStatus()));
         }
         if (globalSession.getStatus() != GlobalStatus.Begin) {
             throw new GlobalTransactionException(GlobalTransactionStatusInvalid, String
@@ -111,8 +122,7 @@ public abstract class AbstractCore implements Core {
 
     }
 
-    private GlobalSession assertGlobalSessionNotNull(String xid, boolean withBranchSessions)
-            throws TransactionException {
+    private GlobalSession assertGlobalSessionNotNull(String xid, boolean withBranchSessions) throws TransactionException {
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid, withBranchSessions);
         if (globalSession == null) {
             throw new GlobalTransactionException(TransactionExceptionCode.GlobalTransactionNotExist,
@@ -122,21 +132,16 @@ public abstract class AbstractCore implements Core {
     }
 
     @Override
-    public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status,
-                             String applicationData) throws TransactionException {
+    public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
+        //取得全局事务
         GlobalSession globalSession = assertGlobalSessionNotNull(xid, true);
+        //取得分支
         BranchSession branchSession = globalSession.getBranch(branchId);
-        if (branchSession == null) {
-            throw new BranchTransactionException(BranchTransactionNotExist,
-                    String.format("Could not found branch session xid = %s branchId = %s", xid, branchId));
-        }
+        //全局事务生命周期监听器监听
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
+        //修改分支状态
         globalSession.changeBranchStatus(branchSession, status);
 
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Report branch status successfully, xid = {}, branchId = {}", globalSession.getXid(),
-                branchSession.getBranchId());
-        }
     }
 
     @Override

@@ -187,6 +187,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 request.getBranchType(),
                 request.getXid(),
                 request.getBranchId(),
+                //这里是request返回的status，状态为reports
                 request.getStatus(),
                 request.getApplicationData()
         );
