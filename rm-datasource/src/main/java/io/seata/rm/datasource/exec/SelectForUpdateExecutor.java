@@ -61,14 +61,21 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
         T rs;
         Savepoint sp = null;
         LockRetryController lockRetryController = new LockRetryController();
+        //当前connection是否自动commit
         boolean originalAutoCommit = conn.getAutoCommit();
+        //参数集合
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
+        //构建一个带有for update的select pl sql, eg->select pk from table where condition for update
         String selectPKSQL = buildSelectSQL(paramAppenderList);
         try {
             if (originalAutoCommit) {
                 /*
                  * In order to hold the local db lock during global lock checking
                  * set auto commit value to false first if original auto commit was true
+                 */
+                /**
+                 * 为了在验证查询并获取全局锁期间不要释放本地db锁
+                 * 所以将自动commit设置为false
                  */
                 conn.setAutoCommit(false);
             } else if (dbmd.supportsSavepoints()) {
@@ -90,7 +97,13 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                     rs = statementCallback.execute(statementProxy.getTargetStatement(), args);
 
                     // Try to get global lock of those rows selected
+                    /**
+                     * 构建前镜像所需要的tableRow
+                     */
                     TableRecords selectPKRows = buildTableRecords(getTableMeta(), selectPKSQL, paramAppenderList);
+                    /**
+                     * 通过主键构建全局锁
+                     */
                     String lockKeys = buildLockKey(selectPKRows);
                     if (StringUtils.isNullOrEmpty(lockKeys)) {
                         break;
@@ -113,6 +126,7 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                     } else {
                         conn.rollback();
                     }
+                    //重试获取全局锁
                     lockRetryController.sleep(lce);
                 }
             }
@@ -134,7 +148,7 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
     }
 
     private String buildSelectSQL(ArrayList<List<Object>> paramAppenderList) {
-        SQLSelectRecognizer recognizer = (SQLSelectRecognizer)sqlRecognizer;
+        SQLSelectRecognizer recognizer = (SQLSelectRecognizer) sqlRecognizer;
         StringBuilder selectSQLAppender = new StringBuilder("SELECT ");
         selectSQLAppender.append(getColumnNameInSQL(getTableMeta().getPkName()));
         selectSQLAppender.append(" FROM ").append(getFromTableInSQL());

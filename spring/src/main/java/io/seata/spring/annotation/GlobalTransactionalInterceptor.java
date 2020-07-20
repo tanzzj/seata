@@ -65,23 +65,31 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
      * @param failureHandler the failure handler
      */
     public GlobalTransactionalInterceptor(FailureHandler failureHandler) {
-        this.failureHandler = failureHandler == null ? DEFAULT_FAIL_HANDLER : failureHandler;
-        this.disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-            DEFAULT_DISABLE_GLOBAL_TRANSACTION);
+        this.failureHandler = failureHandler == null ?
+                DEFAULT_FAIL_HANDLER :
+                failureHandler;
+        this.disable = ConfigurationFactory.getInstance().getBoolean(
+                ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
+                DEFAULT_DISABLE_GLOBAL_TRANSACTION
+        );
     }
 
     @Override
     public Object invoke(final MethodInvocation methodInvocation) throws Throwable {
-        Class<?> targetClass = methodInvocation.getThis() != null ? AopUtils.getTargetClass(methodInvocation.getThis())
-            : null;
+        Class<?> targetClass = methodInvocation.getThis() != null ?
+                AopUtils.getTargetClass(methodInvocation.getThis()) :
+                null;
         Method specificMethod = ClassUtils.getMostSpecificMethod(methodInvocation.getMethod(), targetClass);
         final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
 
         final GlobalTransactional globalTransactionalAnnotation = getAnnotation(method, GlobalTransactional.class);
         final GlobalLock globalLockAnnotation = getAnnotation(method, GlobalLock.class);
+        //处理全局事务
         if (!disable && globalTransactionalAnnotation != null) {
             return handleGlobalTransaction(methodInvocation, globalTransactionalAnnotation);
-        } else if (!disable && globalLockAnnotation != null) {
+        }
+        //处理全局锁
+        else if (!disable && globalLockAnnotation != null) {
             return handleGlobalLock(methodInvocation);
         } else {
             return methodInvocation.proceed();
@@ -100,8 +108,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         });
     }
 
-    private Object handleGlobalTransaction(final MethodInvocation methodInvocation,
-                                           final GlobalTransactional globalTrxAnno) throws Throwable {
+    private Object handleGlobalTransaction(final MethodInvocation methodInvocation, final GlobalTransactional globalTrxAnno) throws Throwable {
         try {
             return transactionalTemplate.execute(new TransactionalExecutor() {
                 @Override
@@ -117,6 +124,10 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     return formatMethod(methodInvocation.getMethod());
                 }
 
+                /**
+                 * 全局事务属性
+                 * @return TransactionInfo
+                 */
                 @Override
                 public TransactionInfo getTransactionInfo() {
                     TransactionInfo transactionInfo = new TransactionInfo();
@@ -186,7 +197,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     public void onChangeEvent(ConfigurationChangeEvent event) {
         if (ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION.equals(event.getDataId())) {
             LOGGER.info("{} config changed, old value:{}, new value:{}", ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-                disable, event.getNewValue());
+                    disable, event.getNewValue());
             disable = Boolean.parseBoolean(event.getNewValue().trim());
         }
     }

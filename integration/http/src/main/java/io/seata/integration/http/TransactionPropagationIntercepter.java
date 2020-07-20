@@ -55,8 +55,7 @@ public class TransactionPropagationIntercepter extends HandlerInterceptorAdapter
     }
 
     @Override
-    public void postHandle(
-            HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) {
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) {
         XidResource.cleanXid(request.getHeader(RootContext.KEY_XID));
     }
 

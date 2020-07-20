@@ -57,7 +57,7 @@ import static io.seata.common.exception.FrameworkErrorCode.NoAvailableService;
  * @author zhaojun
  */
 public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
-    implements RegisterMsgListener, ClientMessageSender {
+        implements RegisterMsgListener, ClientMessageSender {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRpcRemotingClient.class);
     private static final String MSG_ID_PREFIX = "msgId:";
@@ -84,7 +84,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
         this.transactionRole = transactionRole;
         clientBootstrap = new RpcClientBootstrap(nettyClientConfig, eventExecutorGroup, transactionRole);
         clientChannelManager = new NettyClientChannelManager(
-            new NettyPoolableFactory(this, clientBootstrap), getPoolKeyFunction(), nettyClientConfig);
+                new NettyPoolableFactory(this, clientBootstrap), getPoolKeyFunction(), nettyClientConfig);
     }
 
     public NettyClientChannelManager getClientChannelManager() {
@@ -116,11 +116,12 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
             }
         }, SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
         if (NettyClientConfig.isEnableClientBatchSendRequest()) {
-            mergeSendExecutorService = new ThreadPoolExecutor(MAX_MERGE_SEND_THREAD,
-                MAX_MERGE_SEND_THREAD,
-                KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(),
-                new NamedThreadFactory(getThreadPrefix(), MAX_MERGE_SEND_THREAD));
+            mergeSendExecutorService = new ThreadPoolExecutor(
+                    MAX_MERGE_SEND_THREAD,
+                    MAX_MERGE_SEND_THREAD,
+                    KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<>(),
+                    new NamedThreadFactory(getThreadPrefix(), MAX_MERGE_SEND_THREAD));
             mergeSendExecutorService.submit(new MergedSendRunnable());
         }
         super.init();
@@ -150,7 +151,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
 
     @Override
     public Object sendMsgWithResponse(String serverAddress, Object msg, long timeout)
-        throws TimeoutException {
+            throws TimeoutException {
         return super.sendAsyncRequestWithResponse(serverAddress, clientChannelManager.acquireChannel(serverAddress), msg, timeout);
     }
 
@@ -331,7 +332,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
         @Override
         public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
             if (evt instanceof IdleStateEvent) {
-                IdleStateEvent idleStateEvent = (IdleStateEvent)evt;
+                IdleStateEvent idleStateEvent = (IdleStateEvent) evt;
                 if (idleStateEvent.state() == IdleState.READER_IDLE) {
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("channel {} read idle.", ctx.channel());
@@ -361,7 +362,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
             LOGGER.error(FrameworkErrorCode.ExceptionCaught.getErrCode(),
-                NetUtil.toStringAddress(ctx.channel().remoteAddress()) + "connect exception. " + cause.getMessage(), cause);
+                    NetUtil.toStringAddress(ctx.channel().remoteAddress()) + "connect exception. " + cause.getMessage(), cause);
             clientChannelManager.releaseChannel(ctx.channel(), getAddressFromChannel(ctx.channel()));
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("remove exception rm channel:{}", ctx.channel());

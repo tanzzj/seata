@@ -28,8 +28,7 @@ import io.seata.sqlparser.ParametersHolder;
  *
  * @author sharajava
  */
-public class PreparedStatementProxy extends AbstractPreparedStatementProxy
-    implements PreparedStatement, ParametersHolder {
+public class PreparedStatementProxy extends AbstractPreparedStatementProxy implements PreparedStatement, ParametersHolder {
 
     @Override
     public ArrayList<Object>[] getParameters() {
@@ -44,8 +43,7 @@ public class PreparedStatementProxy extends AbstractPreparedStatementProxy
      * @param targetSQL       the target sql
      * @throws SQLException the sql exception
      */
-    public PreparedStatementProxy(AbstractConnectionProxy connectionProxy, PreparedStatement targetStatement,
-                                  String targetSQL) throws SQLException {
+    public PreparedStatementProxy(AbstractConnectionProxy connectionProxy, PreparedStatement targetStatement, String targetSQL) throws SQLException {
         super(connectionProxy, targetStatement, targetSQL);
     }
 

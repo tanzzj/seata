@@ -55,9 +55,7 @@ import static io.seata.core.constants.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANS
  *
  * @author slievrly
  */
-public class GlobalTransactionScanner extends AbstractAutoProxyCreator
-    implements InitializingBean, ApplicationContextAware,
-    DisposableBean {
+public class GlobalTransactionScanner extends AbstractAutoProxyCreator implements InitializingBean, ApplicationContextAware, DisposableBean {
 
     private static final long serialVersionUID = 1L;
 
@@ -76,8 +74,13 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private final String applicationId;
     private final String txServiceGroup;
     private final int mode;
-    private final boolean disableGlobalTransaction = ConfigurationFactory.getInstance().getBoolean(
-        ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, DEFAULT_DISABLE_GLOBAL_TRANSACTION);
+    private final boolean disableGlobalTransaction =
+            ConfigurationFactory
+                    .getInstance()
+                    .getBoolean(
+                            ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
+                            DEFAULT_DISABLE_GLOBAL_TRANSACTION
+                    );
 
     private final FailureHandler failureHandlerHook;
 
@@ -196,12 +199,14 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             return bean;
         }
         try {
+            //todo 这里可以使用concurrentHashSet
             synchronized (PROXYED_SET) {
                 if (PROXYED_SET.contains(beanName)) {
                     return bean;
                 }
                 interceptor = null;
                 //check TCC proxy
+                //是否是tcc模式
                 if (TCCBeanParserUtils.isTccAutoProxy(bean, beanName, applicationContext)) {
                     //TCC interceptor, proxy bean of sofa:reference/dubbo:reference, and LocalTCC
                     interceptor = new TccActionInterceptor(TCCBeanParserUtils.getRemotingDesc(beanName));
@@ -209,8 +214,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     Class<?> serviceInterface = SpringProxyUtils.findTargetClass(bean);
                     Class<?>[] interfacesIfJdk = SpringProxyUtils.findInterfaces(bean);
 
-                    if (!existsAnnotation(new Class[]{serviceInterface})
-                        && !existsAnnotation(interfacesIfJdk)) {
+                    if (!existsAnnotation(new Class[]{serviceInterface}) && !existsAnnotation(interfacesIfJdk)) {
                         return bean;
                     }
 
@@ -267,7 +271,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     @Override
     protected Object[] getAdvicesAndAdvisorsForBean(Class beanClass, String beanName, TargetSource customTargetSource)
-        throws BeansException {
+            throws BeansException {
         return new Object[]{interceptor};
     }
 

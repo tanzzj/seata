@@ -45,6 +45,11 @@ public class RootContext {
 
     public static final String KEY_GLOBAL_LOCK_FLAG = "TX_LOCK";
 
+    private static final String UNDERSCORE = "_";
+
+    /**
+     * context基于线程本地缓存空间,ThreadLocal变量
+     */
     private static ContextCore CONTEXT_HOLDER = ContextCoreLoader.load();
 
     /**
@@ -59,8 +64,8 @@ public class RootContext {
         }
 
         String xidType = CONTEXT_HOLDER.get(KEY_XID_INTERCEPTOR_TYPE);
-        if (StringUtils.isNotBlank(xidType) && xidType.contains("_")) {
-            return xidType.split("_")[0];
+        if (StringUtils.isNotBlank(xidType) && xidType.contains(UNDERSCORE)) {
+            return xidType.split(UNDERSCORE)[0];
         }
 
         return null;
@@ -95,7 +100,7 @@ public class RootContext {
     public static void bindInterceptorType(String xidType) {
         if (StringUtils.isNotBlank(xidType)) {
 
-            String[] xidTypes = xidType.split("_");
+            String[] xidTypes = xidType.split(UNDERSCORE);
 
             if (xidTypes.length == 2) {
                 bindInterceptorType(xidTypes[0], BranchType.valueOf(xidTypes[1]));

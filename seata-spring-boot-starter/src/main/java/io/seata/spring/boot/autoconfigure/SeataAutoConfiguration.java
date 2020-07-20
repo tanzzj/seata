@@ -38,13 +38,18 @@ import static io.seata.spring.annotation.datasource.AutoDataSourceProxyRegistrar
 /**
  * @author xingfudeshi@gmail.com
  */
+@Configuration
 @ComponentScan(basePackages = "io.seata.spring.boot.autoconfigure.properties")
 @ConditionalOnProperty(prefix = StarterConstants.SEATA_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
-@Configuration
 @EnableConfigurationProperties({SeataProperties.class})
 public class SeataAutoConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataAutoConfiguration.class);
 
+    /**
+     * springApplicationContextProvider
+     *
+     * @return SpringApplicationContextProvider
+     */
     @Bean(BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER)
     @ConditionalOnMissingBean(name = {BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER})
     public SpringApplicationContextProvider springApplicationContextProvider() {
@@ -57,6 +62,13 @@ public class SeataAutoConfiguration {
         return new DefaultFailureHandlerImpl();
     }
 
+    /**
+     * 全局事务注解扫描处理
+     *
+     * @param seataProperties
+     * @param failureHandler
+     * @return GlobalTransactionScanner
+     */
     @Bean
     @DependsOn({BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER, BEAN_NAME_FAILURE_HANDLER})
     @ConditionalOnMissingBean(GlobalTransactionScanner.class)
@@ -71,6 +83,6 @@ public class SeataAutoConfiguration {
     @ConditionalOnProperty(prefix = StarterConstants.SEATA_PREFIX, name = {"enableAutoDataSourceProxy", "enable-auto-data-source-proxy"}, havingValue = "true", matchIfMissing = true)
     @ConditionalOnMissingBean(SeataAutoDataSourceProxyCreator.class)
     public SeataAutoDataSourceProxyCreator seataAutoDataSourceProxyCreator(SeataProperties seataProperties) {
-        return new SeataAutoDataSourceProxyCreator(seataProperties.isUseJdkProxy(),seataProperties.getExcludesForAutoProxying());
+        return new SeataAutoDataSourceProxyCreator(seataProperties.isUseJdkProxy(), seataProperties.getExcludesForAutoProxying());
     }
 }

@@ -31,6 +31,10 @@ public class TMClient {
      * @param transactionServiceGroup the transaction service group
      */
     public static void init(String applicationId, String transactionServiceGroup) {
+        /**
+         * 根据applicationId和事务分组创建一个tm的client
+         * tmClient主要用于与server的通讯
+         */
         TmRpcClient tmRpcClient = TmRpcClient.getInstance(applicationId, transactionServiceGroup);
         tmRpcClient.init();
     }

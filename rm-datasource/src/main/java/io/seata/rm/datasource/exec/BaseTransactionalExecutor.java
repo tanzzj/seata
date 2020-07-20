@@ -78,8 +78,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public BaseTransactionalExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
-                                     SQLRecognizer sqlRecognizer) {
+    public BaseTransactionalExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback, SQLRecognizer sqlRecognizer) {
         this.statementProxy = statementProxy;
         this.statementCallback = statementCallback;
         this.sqlRecognizer = sqlRecognizer;
@@ -90,10 +89,9 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      *
      * @param statementProxy    the statement proxy
      * @param statementCallback the statement callback
-     * @param sqlRecognizer     the multi sql recognizer
+     * @param sqlRecognizers     the multi sql recognizer
      */
-    public BaseTransactionalExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
-                                     List<SQLRecognizer> sqlRecognizers) {
+    public BaseTransactionalExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback, List<SQLRecognizer> sqlRecognizers) {
         this.statementProxy = statementProxy;
         this.statementCallback = statementCallback;
         this.sqlRecognizers = sqlRecognizers;

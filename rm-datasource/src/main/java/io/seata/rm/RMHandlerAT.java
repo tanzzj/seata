@@ -42,7 +42,9 @@ public class RMHandlerAT extends AbstractRMHandler {
 
     @Override
     public void handle(UndoLogDeleteRequest request) {
-        DataSourceManager dataSourceManager = (DataSourceManager)getResourceManager();
+        //取得db模式的资源管理器
+        DataSourceManager dataSourceManager = (DataSourceManager) getResourceManager();
+        //取得数据源代理
         DataSourceProxy dataSourceProxy = dataSourceManager.get(request.getResourceId());
         if (dataSourceProxy == null) {
             LOGGER.warn("Failed to get dataSourceProxy for delete undolog on {}", request.getResourceId());
@@ -55,7 +57,8 @@ public class RMHandlerAT extends AbstractRMHandler {
             int deleteRows = 0;
             do {
                 try {
-                    deleteRows = UndoLogManagerFactory.getUndoLogManager(dataSourceProxy.getDbType())
+                    deleteRows = UndoLogManagerFactory
+                            .getUndoLogManager(dataSourceProxy.getDbType())
                             .deleteUndoLogByLogCreated(logCreatedSave, LIMIT_ROWS, conn);
                     if (deleteRows > 0 && !conn.getAutoCommit()) {
                         conn.commit();

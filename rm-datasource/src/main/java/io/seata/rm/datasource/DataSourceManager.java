@@ -73,8 +73,7 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
     }
 
     @Override
-    public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)
-        throws TransactionException {
+    public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys) throws TransactionException {
         try {
             GlobalLockQueryRequest request = new GlobalLockQueryRequest();
             request.setXid(xid);
@@ -165,14 +164,12 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
     }
 
     @Override
-    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
-                                     String applicationData) throws TransactionException {
+    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
         return asyncWorker.branchCommit(branchType, xid, branchId, resourceId, applicationData);
     }
 
     @Override
-    public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId,
-                                       String applicationData) throws TransactionException {
+    public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
         DataSourceProxy dataSourceProxy = get(resourceId);
         if (dataSourceProxy == null) {
             throw new ShouldNeverHappenException();

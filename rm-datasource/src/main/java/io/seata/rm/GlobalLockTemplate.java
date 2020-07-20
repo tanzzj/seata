@@ -44,6 +44,7 @@ public class GlobalLockTemplate<T> {
             // Do Your Business
             rs = business.call();
         } finally {
+
             //clean the global lock declare
             RootContext.unbindGlobalLockFlag();
         }

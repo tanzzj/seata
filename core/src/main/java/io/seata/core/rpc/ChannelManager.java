@@ -43,22 +43,18 @@ import java.util.concurrent.ConcurrentMap;
 public class ChannelManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ChannelManager.class);
-    private static final ConcurrentMap<Channel, RpcContext> IDENTIFIED_CHANNELS
-        = new ConcurrentHashMap<Channel, RpcContext>();
+    private static final ConcurrentMap<Channel, RpcContext> IDENTIFIED_CHANNELS = new ConcurrentHashMap<Channel, RpcContext>();
 
     /**
      * resourceId -> applicationId -> ip -> port -> RpcContext
      */
-    private static final ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer,
-        RpcContext>>>>
-        RM_CHANNELS = new ConcurrentHashMap<String, ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer,
+    private static final ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>>>> RM_CHANNELS = new ConcurrentHashMap<String, ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer,
         RpcContext>>>>();
 
     /**
      * ip+appname,port
      */
-    private static final ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>> TM_CHANNELS
-        = new ConcurrentHashMap<String, ConcurrentMap<Integer, RpcContext>>();
+    private static final ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>> TM_CHANNELS = new ConcurrentHashMap<String, ConcurrentMap<Integer, RpcContext>>();
 
     /**
      * Is registered boolean.

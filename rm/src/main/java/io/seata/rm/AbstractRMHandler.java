@@ -40,8 +40,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author sharajava
  */
-public abstract class AbstractRMHandler extends AbstractExceptionHandler
-    implements RMInboundHandler, TransactionMessageHandler {
+public abstract class AbstractRMHandler extends AbstractExceptionHandler implements RMInboundHandler, TransactionMessageHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRMHandler.class);
 
@@ -96,8 +95,7 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Branch committing: " + xid + " " + branchId + " " + resourceId + " " + applicationData);
         }
-        BranchStatus status = getResourceManager().branchCommit(request.getBranchType(), xid, branchId, resourceId,
-            applicationData);
+        BranchStatus status = getResourceManager().branchCommit(request.getBranchType(), xid, branchId, resourceId, applicationData);
         response.setXid(xid);
         response.setBranchId(branchId);
         response.setBranchStatus(status);
@@ -114,8 +112,7 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
      * @param response the response
      * @throws TransactionException the transaction exception
      */
-    protected void doBranchRollback(BranchRollbackRequest request, BranchRollbackResponse response)
-        throws TransactionException {
+    protected void doBranchRollback(BranchRollbackRequest request, BranchRollbackResponse response) throws TransactionException {
         String xid = request.getXid();
         long branchId = request.getBranchId();
         String resourceId = request.getResourceId();
@@ -123,8 +120,7 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Branch Rollbacking: " + xid + " " + branchId + " " + resourceId);
         }
-        BranchStatus status = getResourceManager().branchRollback(request.getBranchType(), xid, branchId, resourceId,
-            applicationData);
+        BranchStatus status = getResourceManager().branchRollback(request.getBranchType(), xid, branchId, resourceId, applicationData);
         response.setXid(xid);
         response.setBranchId(branchId);
         response.setBranchStatus(status);
