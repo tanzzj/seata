@@ -165,7 +165,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     @Override
     protected void doGlobalReport(GlobalReportRequest request, GlobalReportResponse response, RpcContext rpcContext) throws TransactionException {
-        response.setGlobalStatus(core.globalReport(request.getXid(), request.getGlobalStatus()));
+        response.setGlobalStatus(
+                core.globalReport(request.getXid(),
+                        request.getGlobalStatus())
+        );
     }
 
     @Override
@@ -177,6 +180,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                         rpcContext.getClientId(),
                         request.getXid(),
                         request.getApplicationData(),
+                        //lockKey指 tablename:主键值
                         request.getLockKey())
         );
     }

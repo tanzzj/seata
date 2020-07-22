@@ -59,8 +59,7 @@ public class FileConfiguration extends AbstractConfiguration {
 
     private static final String SYS_FILE_RESOURCE_PREFIX = "file:";
 
-    private final ConcurrentMap<String, Set<ConfigurationChangeListener>> configListenersMap = new ConcurrentHashMap<>(
-        8);
+    private final ConcurrentMap<String, Set<ConfigurationChangeListener>> configListenersMap = new ConcurrentHashMap<>(8);
 
     private final Map<String, String> listenedConfigMap = new HashMap<>(8);
 
@@ -100,6 +99,7 @@ public class FileConfiguration extends AbstractConfiguration {
     public FileConfiguration(String name, boolean allowDynamicRefresh) {
         if (null == name) {
             throw new IllegalArgumentException("name can't be null");
+            //以系统文件标志开头
         } else if (name.startsWith(SYS_FILE_RESOURCE_PREFIX)) {
             File targetFile = new File(name.substring(SYS_FILE_RESOURCE_PREFIX.length()));
             if (targetFile.exists()) {
@@ -138,9 +138,14 @@ public class FileConfiguration extends AbstractConfiguration {
         }
 
         this.name = name;
-        configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD, MAX_CONFIG_OPERATE_THREAD,
-            Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
-            new NamedThreadFactory("configOperate", MAX_CONFIG_OPERATE_THREAD));
+        configOperateExecutor = new ThreadPoolExecutor(
+                CORE_CONFIG_OPERATE_THREAD,
+                MAX_CONFIG_OPERATE_THREAD,
+                Integer.MAX_VALUE,
+                TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(),
+                new NamedThreadFactory("configOperate", MAX_CONFIG_OPERATE_THREAD)
+        );
     }
 
     @Override
@@ -151,28 +156,28 @@ public class FileConfiguration extends AbstractConfiguration {
         }
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigOperation.GET, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (String)configFuture.get();
+        return (String) configFuture.get();
     }
 
     @Override
     public boolean putConfig(String dataId, String content, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigOperation.PUT, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (Boolean)configFuture.get();
+        return (Boolean) configFuture.get();
     }
 
     @Override
     public boolean putConfigIfAbsent(String dataId, String content, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigOperation.PUTIFABSENT, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (Boolean)configFuture.get();
+        return (Boolean) configFuture.get();
     }
 
     @Override
     public boolean removeConfig(String dataId, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, null, ConfigOperation.REMOVE, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (Boolean)configFuture.get();
+        return (Boolean) configFuture.get();
     }
 
     @Override
@@ -270,7 +275,7 @@ public class FileConfiguration extends AbstractConfiguration {
                     setFailResult(configFuture);
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("Could not found property {}, try to use default value instead. exception:{}",
-                            configFuture.getDataId(), e.getMessage());
+                                configFuture.getDataId(), e.getMessage());
                     }
                 }
             }
@@ -295,8 +300,8 @@ public class FileConfiguration extends AbstractConfiguration {
         private final String dataId;
         private final ConfigurationChangeListener listener;
         private final ExecutorService executor = new ThreadPoolExecutor(CORE_LISTENER_THREAD, MAX_LISTENER_THREAD, 0L,
-            TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
-            new NamedThreadFactory("fileListener", MAX_LISTENER_THREAD));
+                TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+                new NamedThreadFactory("fileListener", MAX_LISTENER_THREAD));
 
         /**
          * Instantiates a new FileListener.

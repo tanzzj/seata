@@ -84,27 +84,46 @@ public class SessionHolder {
         }
         StoreMode storeMode = StoreMode.get(mode);
         if (StoreMode.DB.equals(storeMode)) {
-            ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName());
-            ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
-                new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME});
-            RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
-                new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME});
-            RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
-                new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
+            //session管理器初始化
+            ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(
+                    SessionManager.class,
+                    StoreMode.DB.getName()
+            );
+            //异步提交管理器初始化
+            ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(
+                    SessionManager.class,
+                    StoreMode.DB.getName(),
+                    new Object[]{ASYNC_COMMITTING_SESSION_MANAGER_NAME}
+            );
+            //提交重试初始化
+            RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(
+                    SessionManager.class,
+                    StoreMode.DB.getName(),
+                    new Object[]{RETRY_COMMITTING_SESSION_MANAGER_NAME}
+            );
+            //回滚重试初始化
+            RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(
+                    SessionManager.class,
+                    StoreMode.DB.getName(),
+                    new Object[]{RETRY_ROLLBACKING_SESSION_MANAGER_NAME}
+            );
         } else if (StoreMode.FILE.equals(storeMode)) {
-            String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
-                DEFAULT_SESSION_STORE_FILE_DIR);
+            String sessionStorePath =
+                    CONFIG.getConfig(
+                            ConfigurationKeys.STORE_FILE_DIR,
+                            DEFAULT_SESSION_STORE_FILE_DIR
+                    );
             if (StringUtils.isBlank(sessionStorePath)) {
                 throw new StoreException("the {store.file.dir} is empty.");
             }
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
-                new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
+                    new Object[]{ROOT_SESSION_MANAGER_NAME, sessionStorePath});
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
-                new Class[] {String.class, String.class}, new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME, null});
+                    new Class[]{String.class, String.class}, new Object[]{ASYNC_COMMITTING_SESSION_MANAGER_NAME, null});
             RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
-                new Class[] {String.class, String.class}, new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME, null});
+                    new Class[]{String.class, String.class}, new Object[]{RETRY_COMMITTING_SESSION_MANAGER_NAME, null});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
-                new Class[] {String.class, String.class}, new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME, null});
+                    new Class[]{String.class, String.class}, new Object[]{RETRY_ROLLBACKING_SESSION_MANAGER_NAME, null});
         } else {
             throw new IllegalArgumentException("unknown store mode:" + mode);
         }
@@ -116,7 +135,7 @@ public class SessionHolder {
      */
     protected static void reload() {
         if (ROOT_SESSION_MANAGER instanceof Reloadable) {
-            ((Reloadable)ROOT_SESSION_MANAGER).reload();
+            ((Reloadable) ROOT_SESSION_MANAGER).reload();
 
             Collection<GlobalSession> reloadedSessions = ROOT_SESSION_MANAGER.allSessions();
             if (reloadedSessions != null && !reloadedSessions.isEmpty()) {
@@ -255,7 +274,7 @@ public class SessionHolder {
      * lock and execute
      *
      * @param globalSession the global session
-     * @param lockCallable the lock Callable
+     * @param lockCallable  the lock Callable
      * @return the value
      */
     public static <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable) throws TransactionException {

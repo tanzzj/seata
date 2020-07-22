@@ -185,7 +185,8 @@ public class DefaultCore implements Core {
             return globalSession.getStatus();
         }
         if (globalSession.canBeCommittedAsync()) {
-            //二阶段异步提交
+            // AT模式/SAGA模式二阶段异步提交,
+            // TCC/XA模式发起同步提交
             globalSession.asyncCommit();
             return GlobalStatus.Committed;
         } else {

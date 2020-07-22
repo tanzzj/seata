@@ -56,20 +56,22 @@ public final class ConfigurationFactory {
         if (null == envValue) {
             envValue = System.getenv(ENV_SYSTEM_KEY);
         }
-        Configuration configuration = (null == envValue) ? new FileConfiguration(seataConfigName + REGISTRY_CONF_SUFFIX,
-            false) : new FileConfiguration(seataConfigName + "-" + envValue + REGISTRY_CONF_SUFFIX, false);
+        Configuration configuration = (null == envValue) ?
+                new FileConfiguration(seataConfigName + REGISTRY_CONF_SUFFIX, false) :
+                new FileConfiguration(seataConfigName + "-" + envValue + REGISTRY_CONF_SUFFIX, false);
         Configuration extConfiguration = null;
         try {
             extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("load Configuration:{}", extConfiguration == null ? configuration.getClass().getSimpleName()
-                    : extConfiguration.getClass().getSimpleName());
+                        : extConfiguration.getClass().getSimpleName());
             }
         } catch (EnhancedServiceNotFoundException ignore) {
 
         } catch (Exception e) {
             LOGGER.error("failed to load extConfiguration:{}", e.getMessage(), e);
         }
+        // 拿registry.conf中 config指向的 file.conf
         CURRENT_FILE_INSTANCE = null == extConfiguration ? configuration : extConfiguration;
     }
 
@@ -98,15 +100,23 @@ public final class ConfigurationFactory {
         ConfigType configType;
         String configTypeName = null;
         try {
+            // 从registry.conf中拿到 config.type
             configTypeName = CURRENT_FILE_INSTANCE.getConfig(
-                ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-                    + ConfigurationKeys.FILE_ROOT_TYPE);
+                    //config.type
+                    ConfigurationKeys.FILE_ROOT_CONFIG
+                            + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                            + ConfigurationKeys.FILE_ROOT_TYPE
+            );
             configType = ConfigType.getType(configTypeName);
         } catch (Exception e) {
             throw new NotSupportYetException("not support register type: " + configTypeName, e);
         }
+        // 配置模式为file
         if (ConfigType.File == configType) {
+            // meaning --> config.file.name 即registry.conf 中配置了 config=file 取得 file.name=file.conf的配置
             String pathDataId = String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, FILE_TYPE, NAME_KEY);
+            // 从config.file.name key 中获取 value
+            // name= file.conf
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
             Configuration configuration = new FileConfiguration(name);
             Configuration extConfiguration = null;
@@ -114,8 +124,9 @@ public final class ConfigurationFactory {
                 extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("load Configuration:{}",
-                        extConfiguration == null ? configuration.getClass().getSimpleName()
-                            : extConfiguration.getClass().getSimpleName());
+                            extConfiguration == null ?
+                                    configuration.getClass().getSimpleName() :
+                                    extConfiguration.getClass().getSimpleName());
                 }
             } catch (EnhancedServiceNotFoundException ignore) {
 
@@ -123,9 +134,12 @@ public final class ConfigurationFactory {
                 LOGGER.error("failed to load extConfiguration:{}", e.getMessage(), e);
             }
             return null == extConfiguration ? configuration : extConfiguration;
+            //配置模式为其他 如 nacos
         } else {
-            return EnhancedServiceLoader.load(ConfigurationProvider.class, Objects.requireNonNull(configType).name())
-                .provide();
+            return EnhancedServiceLoader.load(
+                    ConfigurationProvider.class,
+                    Objects.requireNonNull(configType).name()
+            ).provide();
         }
     }
 }

@@ -241,8 +241,7 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
                     doLockCheck(request, response, rpcContext);
                 } catch (StoreException e) {
                     throw new TransactionException(TransactionExceptionCode.FailedStore, String
-                        .format("global lock query request failed. xid=%s, msg=%s", request.getXid(), e.getMessage()),
-                        e);
+                        .format("global lock query request failed. xid=%s, msg=%s", request.getXid(), e.getMessage()), e);
                 }
             }
         }, request, response);
@@ -326,8 +325,7 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
      * @param rpcContext the rpc context
      * @throws TransactionException the transaction exception
      */
-    protected abstract void doGlobalReport(GlobalReportRequest request, GlobalReportResponse response,
-                                           RpcContext rpcContext) throws TransactionException;
+    protected abstract void doGlobalReport(GlobalReportRequest request, GlobalReportResponse response, RpcContext rpcContext) throws TransactionException;
 
     private void checkTransactionStatus(AbstractGlobalEndRequest request, AbstractGlobalEndResponse response) {
         try {

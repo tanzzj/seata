@@ -57,7 +57,7 @@ public class NacosConfiguration extends AbstractConfiguration {
     private static volatile ConfigService configService;
     private static final int MAP_INITIAL_CAPACITY = 8;
     private ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> configListenersMap
-        = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+            = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
 
     /**
      * Get instance of NacosConfiguration
@@ -195,10 +195,10 @@ public class NacosConfiguration extends AbstractConfiguration {
             properties.setProperty(PRO_NAMESPACE_KEY, namespace);
         }
         String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME)
-            : FILE_CONFIG.getConfig(getNacosUserName());
+                : FILE_CONFIG.getConfig(getNacosUserName());
         if (StringUtils.isNotBlank(userName)) {
             String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD)
-                : FILE_CONFIG.getConfig(getNacosPassword());
+                    : FILE_CONFIG.getConfig(getNacosPassword());
             if (StringUtils.isNotBlank(password)) {
                 properties.setProperty(USER_NAME, userName);
                 properties.setProperty(PASSWORD, password);
@@ -221,12 +221,12 @@ public class NacosConfiguration extends AbstractConfiguration {
 
     private static String getNacosUserName() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE,
-            USER_NAME);
+                USER_NAME);
     }
 
     private static String getNacosPassword() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE,
-            PASSWORD);
+                PASSWORD);
     }
 
     private static String getNacosGroup() {
@@ -267,8 +267,10 @@ public class NacosConfiguration extends AbstractConfiguration {
 
         @Override
         public void innerReceive(String dataId, String group, String configInfo) {
-            ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(dataId).setNewValue(configInfo)
-                .setNamespace(group);
+            ConfigurationChangeEvent event = new ConfigurationChangeEvent()
+                    .setDataId(dataId)
+                    .setNewValue(configInfo)
+                    .setNamespace(group);
             listener.onProcessEvent(event);
         }
     }

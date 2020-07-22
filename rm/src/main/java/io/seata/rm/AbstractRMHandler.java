@@ -62,8 +62,7 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler impleme
         BranchRollbackResponse response = new BranchRollbackResponse();
         exceptionHandleTemplate(new AbstractCallback<BranchRollbackRequest, BranchRollbackResponse>() {
             @Override
-            public void execute(BranchRollbackRequest request, BranchRollbackResponse response)
-                throws TransactionException {
+            public void execute(BranchRollbackRequest request, BranchRollbackResponse response) throws TransactionException {
                 doBranchRollback(request, response);
             }
         }, request, response);

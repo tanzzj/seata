@@ -45,10 +45,14 @@ public class Server {
     private static final int MAX_SERVER_POOL_SIZE = 500;
     private static final int MAX_TASK_QUEUE_SIZE = 20000;
     private static final int KEEP_ALIVE_TIME = 500;
-    private static final ThreadPoolExecutor WORKING_THREADS = new ThreadPoolExecutor(MIN_SERVER_POOL_SIZE,
-            MAX_SERVER_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(MAX_TASK_QUEUE_SIZE),
-            new NamedThreadFactory("ServerHandlerThread", MAX_SERVER_POOL_SIZE), new ThreadPoolExecutor.CallerRunsPolicy());
+    private static final ThreadPoolExecutor WORKING_THREADS =
+            new ThreadPoolExecutor(
+                    MIN_SERVER_POOL_SIZE,
+                    MAX_SERVER_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
+                    new LinkedBlockingQueue<>(MAX_TASK_QUEUE_SIZE),
+                    new NamedThreadFactory("ServerHandlerThread", MAX_SERVER_POOL_SIZE),
+                    new ThreadPoolExecutor.CallerRunsPolicy()
+            );
 
     /**
      * The entry point of application.
@@ -64,7 +68,7 @@ public class Server {
 
         //initialize the metrics
         MetricsManager.get().init();
-        //取得存储模式，db或者file
+        //取得session存储模式，db或者file
         System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
         //简历一个rpc服务器
         RpcServer rpcServer = new RpcServer(WORKING_THREADS);

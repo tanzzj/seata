@@ -35,7 +35,9 @@ public class RMClient {
         RmRpcClient rmRpcClient = RmRpcClient.getInstance(applicationId, transactionServiceGroup);
         //初始化资源管理器
         rmRpcClient.setResourceManager(DefaultResourceManager.get());
+        //初始化TC消息监听
         rmRpcClient.setClientMessageListener(new RmMessageListener(DefaultRMHandler.get(), rmRpcClient));
+        //初始化netty客户端
         rmRpcClient.init();
     }
 
